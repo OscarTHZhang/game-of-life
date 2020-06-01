@@ -100,7 +100,6 @@ impl Universe {
         self.width
     }
 
-    pub fn 
 }
 
 // add display trait for struct Universe

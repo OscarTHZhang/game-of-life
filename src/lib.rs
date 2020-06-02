@@ -1,7 +1,8 @@
 mod utils;
 
+extern crate js_sys;
+
 use wasm_bindgen::prelude::*;
-use std::fmt;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
@@ -60,14 +61,15 @@ impl Universe {
                 let index = self.get_index(r, c);
                 let cell = self.cells[index];
                 let live_neighbors = self.live_neighbor_count(r, c);
-
                 let next_cell = match (cell, live_neighbors) {
-                    (Cell::Alive, x) if x < 2 => Cell::Dead, // under-population
-                    (Cell::Alive, 2) | (Cell::Alive, 3) => Cell::Alive, // normal population
-                    (Cell::Alive, x) if x > 3 => Cell::Dead, // over-population
-                    (Cell::Dead, 3) => Cell::Alive, // dead cell with three living neighbor becomes alive
-                    (other, _) => other, // othercases remain the same state
+                    (Cell::Alive, x) if x < 2 => Cell::Dead,
+                    (Cell::Alive, 2) | (Cell::Alive, 3) => Cell::Alive,
+                    (Cell::Alive, x) if x > 3 => Cell::Dead,
+                    (Cell::Dead, 3) => Cell::Alive,
+                    // All other cells remain in the same state.
+                    (otherwise, _) => otherwise,
                 };
+
                 next[index] = next_cell; // assign the next state for the cell
             }
         }
@@ -79,20 +81,20 @@ impl Universe {
         let width = 64;
         let height = 32;
 
-        let cells = (0..width * height).map(|i| {
-            if i % 2 == 0 || i % 7 == 0 {
-                Cell::Alive
-            } else {
-                Cell::Dead
-            }
-        }).collect();
-
-        Universe { width, height, cells, }
-    }
-
-    // render (show) function for Universe
-    pub fn render(&self) -> String {
-        self.to_string()
+        let cells = (0..width * height)
+            .map(|i| {
+                if js_sys::Math::random() < 0.5 {
+                    Cell::Alive
+                } else {
+                    Cell::Dead
+                }
+            }).collect();
+        
+        Universe {
+            width,
+            height,
+            cells,
+        }
     }
 
     // public getters
@@ -106,23 +108,6 @@ impl Universe {
 
     pub fn cells(&self) -> *const Cell {
         self.cells.as_ptr()
-    }
-
-}
-
-// add display trait for struct Universe
-impl fmt::Display for Universe {
-
-    // displace the universe
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        for line in self.cells.as_slice().chunks(self.width as usize) {
-            for &cell in line {
-                let symbol = if cell == Cell::Dead {'🞏'} else {'◼'}; 
-                write!(f, "{}", symbol)?;
-            }
-            write!(f, "\n")?;
-        }
-        Ok(())
     }
 
 }

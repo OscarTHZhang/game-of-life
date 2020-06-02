@@ -25,6 +25,15 @@ pub struct Universe {
     cells: Vec<Cell>,
 }
 
+impl Cell {
+    fn toggle(&mut self) {
+        *self = match *self {
+            Cell::Alive => Cell::Dead,
+            Cell::Dead => Cell::Alive,
+        };
+    }
+}
+
 #[wasm_bindgen]
 impl Universe {
 
@@ -108,6 +117,12 @@ impl Universe {
 
     pub fn cells(&self) -> *const Cell {
         self.cells.as_ptr()
+    }
+
+    // change the cell from alive to dead or vice versa
+    pub fn toggle_cell(&mut self, row: u32, col: u32) {
+        let index = self.get_index(row, col);
+        self.cells[index].toggle();
     }
 
 }

@@ -37,7 +37,7 @@ impl Universe {
         let mut count = 0;
         for delta_row in [self.height - 1, 0, 1].iter().cloned() {
             for delta_col in [self.width - 1, 0, 1].iter().cloned() {
-                if delta_row == 0 && delta_col == 0 {
+                if delta_row == 0 && delta_col == 0 { // omit the origin
                     continue;
                 }
 
@@ -81,13 +81,13 @@ impl Universe {
 
         let cells = (0..width * height).map(|i| {
             if i % 2 == 0 || i % 7 == 0 {
-                Cell::Dead
-            } else {
                 Cell::Alive
+            } else {
+                Cell::Dead
             }
         }).collect();
 
-        Universe { width, height, cells }
+        Universe { width, height, cells, }
     }
 
     // render (show) function for Universe
@@ -98,6 +98,14 @@ impl Universe {
     // public getters
     pub fn width(&self) -> u32 {
         self.width
+    }
+
+    pub fn height(&self) -> u32 {
+        self.height
+    }
+
+    pub fn cells(&self) -> *const Cell {
+        self.cells.as_ptr()
     }
 
 }
